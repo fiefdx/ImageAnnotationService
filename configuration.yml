@@ -1,0 +1,2 @@
+log_level: NOSET
+max_buffer_size: 1073741824 # 1073741824 = 1G

@@ -1,0 +1,14 @@
+{
+    "actions": [
+        {
+            "name": "service",
+            "condition": [],
+            "target_env": {
+                "platform": "arm64"
+            },
+            "env": "venvs/venv",
+            "main": "python service.py"
+        }
+    ],
+    "output_action": "service"
+}
