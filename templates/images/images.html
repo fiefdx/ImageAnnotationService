@@ -138,8 +138,10 @@
 {% end %}
 
 {% block javascript %}
+<link href="{{ static_url('annotorious/annotorious.min.css') }}" rel="stylesheet" >
 <link href="{{ static_url('css/common.css') }}" rel="stylesheet" >
 <link href="{{ static_url('css/images.css') }}" rel="stylesheet" >
+<script src="{{ static_url('annotorious/annotorious.min.js') }}"></script>
 <script src="{{ static_url('js/common.js') }}"></script>
 <script src="{{ static_url('js/images.js') }}"></script>
 <script type="text/javascript">

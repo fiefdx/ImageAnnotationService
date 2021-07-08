@@ -16,6 +16,8 @@ function imagesInit (height_delta) {
     };
     var service_host = window.location.host;
 
+    var annotation = null;
+
     $btn_previous.bind('click', previousImage);
     $btn_next.bind('click', nextImage);
     $btn_save.bind('click', saveAnnotation);
@@ -54,6 +56,7 @@ function imagesInit (height_delta) {
                                     showWarningToast("operation failed", data.message);
                                 }
                                 var img = new Image();
+                                img.id = "annotation_image";
                                 img.src = image_url;
                                 $annotation_window.empty();
                                 img.height = $(window).height() - height_delta;
@@ -66,6 +69,18 @@ function imagesInit (height_delta) {
                                 $("span#total-images").text(settings.total);
                                 $("#input-resource input").val(settings.file_path + "/" + file_name);
                                 $("#output-resource input").val(settings.annotation_path + "/" + file_name + ".json");
+                                if (annotation) {
+                                    annotation.destroy();
+                                }
+                                annotation = Annotorious.init({
+                                    image: 'annotation_image',
+                                    locale: 'auto',
+                                    widgets: [
+                                        {widget: 'COMMENT'},
+                                        {widget: 'TAG', vocabulary: ['Dialog', 'Vehicle', 'People']}
+                                    ]
+                                });
+                                annotation.setDrawingTool('polygon');
                             },
                             error: function() {
                                 showWarningToast("error", "request file failed");
@@ -102,18 +117,30 @@ function imagesInit (height_delta) {
                     if (data.result != "ok") {
                         showWarningToast("operation failed", data.message);
                     }
+                    if (annotation) {
+                        annotation.destroy();
+                    }
                     var img = new Image();
+                    img.id = "annotation_image";
                     img.src = image_url;
                     $annotation_window.empty();
                     img.height = $(window).height() - height_delta;
                     $annotation_window.append(img);
                     var file_name = data["file"]["name"];
                     var file_path = data["file_path"];
-                    console.log(file_name, file_path);
                     $("span#current-image").text(settings.current);
                     $("span#total-images").text(settings.total);
                     $("#input-resource input").val(settings.file_path + "/" + file_name);
                     $("#output-resource input").val(settings.annotation_path + "/" + file_name + ".json");
+                    annotation = Annotorious.init({
+                        image: 'annotation_image',
+                        locale: 'auto',
+                        widgets: [
+                            {widget: 'COMMENT'},
+                            {widget: 'TAG', vocabulary: ['Dialog', 'Vehicle', 'People']}
+                        ]
+                    });
+                    annotation.setDrawingTool('polygon');
                 },
                 error: function() {
                     showWarningToast("error", "request file failed");
@@ -139,18 +166,30 @@ function imagesInit (height_delta) {
                     if (data.result != "ok") {
                         showWarningToast("operation failed", data.message);
                     }
+                    if (annotation) {
+                        annotation.destroy();
+                    }
                     var img = new Image();
+                    img.id = "annotation_image";
                     img.src = image_url;
                     $annotation_window.empty();
                     img.height = $(window).height() - height_delta;
                     $annotation_window.append(img);
                     var file_name = data["file"]["name"];
                     var file_path = data["file_path"];
-                    console.log(file_name, file_path);
                     $("span#current-image").text(settings.current);
                     $("span#total-images").text(settings.total);
                     $("#input-resource input").val(settings.file_path + "/" + file_name);
                     $("#output-resource input").val(settings.annotation_path + "/" + file_name + ".json");
+                    annotation = Annotorious.init({
+                        image: 'annotation_image',
+                        locale: 'auto',
+                        widgets: [
+                            {widget: 'COMMENT'},
+                            {widget: 'TAG', vocabulary: ['Dialog', 'Vehicle', 'People']}
+                        ]
+                    });
+                    annotation.setDrawingTool('polygon');
                 },
                 error: function() {
                     showWarningToast("error", "request file failed");
