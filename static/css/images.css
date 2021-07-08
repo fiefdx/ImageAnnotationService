@@ -31,6 +31,20 @@
     padding-right: 0px;
 }
 
+#draw-type-selector {
+    height: 32px;
+}
+
+label.btn-sm {
+    padding-top: 1px;
+    padding-bottom: 1px;
+    padding-left: 4px;
+    padding-right: 4px;
+    line-height: 26px;
+    outline: none;
+    box-shadow: none;
+}
+
 
 
 tr {

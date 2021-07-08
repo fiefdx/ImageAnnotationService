@@ -5,6 +5,7 @@ function imagesInit (height_delta, vocabulary) {
     var $btn_save = $("#btn_save");
     var $btn_settings = $("#btn_settings");
     var $btn_settings_update = $("#form_settings #btn_update");
+    var $btn_draw_type = $("#draw-type-selector label.btn-sm input");
     var $annotation_window = $("#annotation-window-container");
     var settings = {
         source: "",
@@ -13,7 +14,8 @@ function imagesInit (height_delta, vocabulary) {
         total: 0,
         file_path: "",
         annotation_path: "",
-        annotation_suffix: "_annotation"
+        annotation_suffix: "_annotation",
+        draw_type: "rect"
     };
     var service_host = window.location.host;
 
@@ -25,6 +27,7 @@ function imagesInit (height_delta, vocabulary) {
     $btn_settings.bind('click', showSettings);
     $("#settings_modal").on("hidden.bs.modal", resetModal);
     $btn_settings_update.bind('click', updateSettings);
+    $btn_draw_type.bind('click', updateDrawType);
 
     function showSettings() {
         if (settings.source) {
@@ -81,7 +84,7 @@ function imagesInit (height_delta, vocabulary) {
                                         {widget: 'TAG', vocabulary: vocabulary}
                                     ]
                                 });
-                                annotation.setDrawingTool('polygon');
+                                annotation.setDrawingTool(settings.draw_type);
                                 var annotation_url = "http://" + service_host + "/file?storage=" + settings.store + settings.annotation_path + "/" + file_name + ".json";
                                 $.ajax({
                                     type: "HEAD",
@@ -152,7 +155,7 @@ function imagesInit (height_delta, vocabulary) {
                             {widget: 'TAG', vocabulary: vocabulary}
                         ]
                     });
-                    annotation.setDrawingTool('polygon');
+                    annotation.setDrawingTool(settings.draw_type);
                     var annotation_url = "http://" + service_host + "/file?storage=" + settings.store + settings.annotation_path + "/" + file_name + ".json";
                     $.ajax({
                         type: "HEAD",
@@ -212,7 +215,7 @@ function imagesInit (height_delta, vocabulary) {
                             {widget: 'TAG', vocabulary: vocabulary}
                         ]
                     });
-                    annotation.setDrawingTool('polygon');
+                    annotation.setDrawingTool(settings.draw_type);
                     var annotation_url = "http://" + service_host + "/file?storage=" + settings.store + settings.annotation_path + "/" + file_name + ".json";
                     $.ajax({
                         type: "HEAD",
@@ -261,6 +264,14 @@ function imagesInit (height_delta, vocabulary) {
                 }
             });
         }
+    }
+
+    function updateDrawType() {
+        if (annotation) {
+            settings.draw_type = $(this).attr("id"); // only ["rect", "polygon"]
+            annotation.setDrawingTool(settings.draw_type);
+        }
+        $("#draw-type-selector label").removeClass("focus");
     }
 
     function resetModal(e) {

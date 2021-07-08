@@ -14,6 +14,14 @@
                 <button id="btn_next" type="button" class="btn btn-light" onclick="this.blur();">
                     <span class="oi oi-chevron-right" title="next" aria-hidden="true"></span>
                 </button>
+                <div id="draw-type-selector" class="btn-group btn-group-toggle" data-toggle="buttons">
+                    <label class="btn btn-secondary btn-sm active">
+                        <input type="radio" name="draw-type" id="rect" autocomplete="off" checked>Rectangle
+                    </label>
+                    <label class="btn btn-secondary btn-sm">
+                        <input type="radio" name="draw-type" id="polygon" autocomplete="off">Polygon
+                    </label>
+                </div>
                 <button id="btn_save" type="button" class="btn btn-light" onclick="this.blur();">
                     <span class="oi oi-cloud-upload" title="save" aria-hidden="true"></span>
                 </button>
