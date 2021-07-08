@@ -11,6 +11,7 @@ import tornado.web
 from litepipeline_helper.models.action import Action
 
 from handlers import info
+from handlers import data
 from utils import common
 import logger
 from config import CONFIG
@@ -24,6 +25,8 @@ class Application(tornado.web.Application):
     def __init__(self):
         handlers = [
             (r"/", info.HomeHandler),
+            (r"/file", data.FileHandler),
+            (r"/files", data.ListFilesHandler),
         ]
         settings = dict(
             debug = False,
@@ -49,7 +52,7 @@ if __name__ == "__main__":
     LOG.debug("service start")
     LOG.debug("input_data: %s", input_data)
 
-    data = {}
+    result = {}
     try:
         CONFIG["data_path"] = workspace
         CONFIG["http_host"] = input_data["http_host"]
@@ -70,5 +73,5 @@ if __name__ == "__main__":
     except Exception as e:
         LOG.exception(e)
 
-    Action.set_output(data = data)
+    Action.set_output(data = result)
     LOG.debug("service end")
