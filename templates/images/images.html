@@ -4,6 +4,9 @@
 <div id="body-fluid" class="fluid">
     <div id="toolbar-row" class="row">
         <div id="toolbar-col" class="col">
+            <div id="toolbar-left" class="btn-group btn-group-sm float-left" role="group" aria-label="toolbar-left">
+                <span id="current-image"></span><span> / </span><span id="total-images"></span>
+            </div>
             <div id="toolbar-right" class="btn-group btn-group-sm float-right" role="group" aria-label="toolbar-right">
                 <button id="btn_previous" type="button" class="btn btn-light" onclick="this.blur();">
                     <span class="oi oi-chevron-left" title="previous" aria-hidden="true"></span>
@@ -141,17 +144,20 @@
 <script src="{{ static_url('js/images.js') }}"></script>
 <script type="text/javascript">
     var scrollBarSize = getBrowserScrollSize();
+    var height_delta = 135;
     window.onload = window.onresize = function(){
         $(document).ready(function(){
             var window_height = $(window).height();
             var window_width = $(window).width();
+            $("#annotation-window-container img").height(window_height - height_delta);
         });
     }
 
     $(document).ready(function(){
         var window_height = $(window).height();
         var window_width = $(window).width();
-        imagesInit();
+        $("#annotation-window-container img").height(window_height - height_delta);
+        imagesInit(height_delta);
     });
 </script>
 {% end %}

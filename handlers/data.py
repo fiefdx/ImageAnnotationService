@@ -26,7 +26,7 @@ class ListFilesHandler(BaseHandler):
             sort_order = self.get_argument("sort_order", "asc")
             if storage:
                 u = urllib.parse.urlparse(storage)
-                dir_path = u.path
+                dir_path = os.path.abspath(u.path)
                 host = u.hostname
                 port = u.port
                 scheme = u.scheme
