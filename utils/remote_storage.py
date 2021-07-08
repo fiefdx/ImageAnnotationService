@@ -64,6 +64,45 @@ class RemoteStorage(object):
             LOG.exception(e)
         return items, total
 
+    def listzip(self, zip_file_path, sort_by = "name", desc = False, offset = 0, limit = -1, only_files = False):
+        dirs = []
+        files = []
+        try:
+            rf = self.open_remote_file(zip_file_path)
+            z = zipfile.ZipFile(rf)
+            files_info = z.infolist()
+            n = 1
+            for f in files_info:
+                if f.is_dir():
+                    if only_files:
+                        continue
+                    d_path = f.filename
+                    dirs.append({
+                        "num": n,
+                        "name": f.filename,
+                        "sha1": sha1sum(d_path),
+                        "type": "Directory",
+                        "size": f.file_size,
+                        "ctime": "",
+                        "mtime": ""
+                    })
+                else:
+                    f_path = f.filename
+                    files.append({
+                        "num": n,
+                        "name": f.filename,
+                        "sha1": sha1sum(f_path),
+                        "type": os.path.splitext(f.filename)[-1],
+                        "size": f.file_size,
+                        "ctime": "",
+                        "mtime": ""
+                    })
+                n += 1
+            items, total = listsort(dirs, files, sort_by = sort_by, desc = desc, offset = offset, limit = limit)
+        except Exception as e:
+            LOG.exception(e)
+        return items, total
+
     def list_storage(self, home_path, dir_path, sort_by = "name", desc = False, offset = 0, limit = -1):
         data = {}
         try:
@@ -222,6 +261,18 @@ class RemoteStorage(object):
             fp = self.client.open_remote_file(file_path)
             if fp:
                 result = fp.read()
+        except Exception as e:
+            LOG.exception(e)
+        return result
+
+    def read_zip_file(self, zip_file_path, file_path):
+        result = False
+        try:
+            fp = self.client.open_remote_file(zip_file_path)
+            if fp:
+                z = zipfile.ZipFile(fp)
+                file = z.open(file_path)
+                result = file.read()
         except Exception as e:
             LOG.exception(e)
         return result

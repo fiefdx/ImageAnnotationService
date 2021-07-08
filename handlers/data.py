@@ -38,14 +38,7 @@ class ListImageFilesHandler(BaseHandler):
                         total = 0
                         exists = c.exists_file(dir_path)
                         if exists:
-                            rf = c.open_remote_file(dir_path)
-                            z = zipfile.ZipFile(rf)
-                            names = z.namelist()
-                            for n in names:
-                                if not n.endswith("/"):
-                                    files.append(n)
-                            files.sort(reverse = True if sort_order == "desc" else False)
-                            total = len(files)
+                            files, total = c.listzip(dir_path, sort_by = sort_by, desc = True if sort_order == "desc" else False, offset = offset, limit = limit, only_files = True)
                         else:
                             files, total = c.listdir(dir_path, sort_by = sort_by, desc = True if sort_order == "desc" else False, offset = offset, limit = limit, only_files = True)
                         result["path"] = dir_path
@@ -94,15 +87,7 @@ class ImageFileHandler(BaseHandler):
                         file_path = ""
                         exists = c.exists_file(dir_path)
                         if exists:
-                            rf = c.open_remote_file(dir_path)
-                            z = zipfile.ZipFile(rf)
-                            names = z.namelist()
-                            for n in names:
-                                if not n.endswith("/"):
-                                    files.append(n)
-                            files.sort(reverse = True if sort_order == "desc" else False)
-                            file_path = files[number - 1]
-                            files = [{"name": files[number - 1], "size": 0}]
+                            files, _ = c.listzip(dir_path, sort_by = sort_by, desc = True if sort_order == "desc" else False, offset = number - 1, limit = 1, only_files = True)
                         else:
                             files, _ = c.listdir(dir_path, sort_by = sort_by, desc = True if sort_order == "desc" else False, offset = number - 1, limit = 1, only_files = True)
                         file = files[0]
@@ -111,8 +96,7 @@ class ImageFileHandler(BaseHandler):
                             result["file_path"] = os.path.join(dir_path, file["name"])
                         else:
                             if exists:
-                                fp = z.open(file_path)
-                                content = fp.read()
+                                content = c.read_zip_file(dir_path, file["name"])
                             else:
                                 content = c.read_file(os.path.join(dir_path, file["name"]))
                             if content is not False:
