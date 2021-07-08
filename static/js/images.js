@@ -2,6 +2,7 @@ function imagesInit (height_delta, vocabulary) {
     var scrollBarSize = getBrowserScrollSize();
     var $current_image = $("input#current-image");
     var $total_images = $("input#total-images");
+    var $btn_play = $("#btn_play");
     var $show_annotations = $("input#show-annotations");
     var $btn_previous = $("#btn_previous");
     var $interval = $("input#interval");
@@ -26,13 +27,19 @@ function imagesInit (height_delta, vocabulary) {
         draw_type: "rect",
         show: true,
         cache: [],
-        interval: 1
+        interval: 1,
+        play: false,
+        frame_ready: false
     };
     var service_host = window.location.host;
     var annotation = null;
+    var play_timer = null;
+    var sleep_time = 0;
 
+    refreshPlayButton();
     $current_image.val(settings.current);
     $total_images.val(settings.total);
+    $btn_play.bind('click', autoPlay);
     $show_annotations.prop("checked", settings.show);
     $interval.val(settings.interval);
     $("#input-resource input").val("");
@@ -48,6 +55,35 @@ function imagesInit (height_delta, vocabulary) {
     $settings_source.on('change', autoGenerateTarget);
     $interval.on('change', changeInterval);
     $current_image.on('change', gotoImage);
+
+    function autoPlay() {
+        if (settings.play) {
+            settings.play = false;
+            document.getElementById("annotation_image").onloadend = null;
+            clearTimeout(play_timer);
+        } else {
+            settings.play = true;
+            play_timer = setTimeout(play, sleep_time);
+        }
+        refreshPlayButton();
+    }
+
+    function refreshPlayButton() {
+        if (settings.play) {
+            $("#btn_play span").removeClass("oi-media-play");
+            $("#btn_play span").addClass("oi-media-pause");
+        } else {
+            $("#btn_play span").removeClass("oi-media-pause");
+            $("#btn_play span").addClass("oi-media-play");
+        }
+    }
+
+    function play() {
+        document.getElementById("annotation_image").onloadend = function() {
+            nextImage();
+        }
+        nextImage();
+    }
 
     function showSettings() {
         if (settings.source) {
