@@ -8,9 +8,13 @@ function imagesInit (height_delta, vocabulary) {
     var $btn_settings_update = $("#form_settings #btn_update");
     var $btn_draw_type = $("#draw-type-selector label.btn-sm input");
     var $annotation_window = $("#annotation-window-container");
+    var $settings_source = $('#settings_modal input#source');
+    var $settings_target = $('#settings_modal input#target');
     var settings = {
         source: "",
+        target: "",
         store: "",
+        target_store: "",
         current: 0,
         total: 0,
         file_path: "",
@@ -34,22 +38,27 @@ function imagesInit (height_delta, vocabulary) {
     $btn_settings_update.bind('click', updateSettings);
     $btn_draw_type.bind('click', updateDrawType);
     $show_annotations.on('change', switchShowAnnotations);
+    $settings_source.on('change', autoGenerateTarget);
 
     function showSettings() {
         if (settings.source) {
-            $('#settings_modal input#source').val(settings.source);
+            $settings_source.val(settings.source);
+            $settings_target.val(settings.target);
         }
         $('#settings_modal').modal('show');
     }
 
     function updateSettings() {
-        var source = $('#settings_modal input#source').val() || "";
-        if (source != settings.source) {
+        var source = $settings_source.val() || "";
+        var target = $settings_target.val();
+        if (source && target && (source != settings.source || target != settings.annotation_path)) {
             settings.source = source;
+            settings.target = target;
             $("#input-resource input").val("");
             $("#output-resource input").val("");
             if (settings.source) {
                 settings.store = settings.source.match("ldfs://[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+")[0];
+                settings.target_store = settings.target.match("ldfs://[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+")[0];
                 $.ajax({
                     dataType: "json",
                     url: "http://" + service_host + "/images?storage=" + settings.source + "&offset=0&limit=5",
@@ -59,7 +68,8 @@ function imagesInit (height_delta, vocabulary) {
                         }
                         settings.total = data.total;
                         settings.file_path = data.path;
-                        settings.annotation_path = data.path + settings.annotation_suffix;
+                        settings.target = settings.target;
+                        settings.annotation_path = settings.target.replace(settings.target_store, "");
                         var image_url = "http://" + service_host + "/image?storage=" + settings.source + "&number=1";
                         $.ajax({
                             url: image_url + "&info=true",
@@ -93,7 +103,7 @@ function imagesInit (height_delta, vocabulary) {
                                     ]
                                 });
                                 annotation.setDrawingTool(settings.draw_type);
-                                var annotation_url = "http://" + service_host + "/file?storage=" + settings.store + settings.annotation_path + "/" + file_name + ".json";
+                                var annotation_url = "http://" + service_host + "/file?storage=" + settings.target_store + settings.annotation_path + "/" + file_name + ".json";
                                 loadAnnotations(annotation_url);
                             },
                             error: function() {
@@ -155,7 +165,7 @@ function imagesInit (height_delta, vocabulary) {
                         ]
                     });
                     annotation.setDrawingTool(settings.draw_type);
-                    var annotation_url = "http://" + service_host + "/file?storage=" + settings.store + settings.annotation_path + "/" + file_name + ".json";
+                    var annotation_url = "http://" + service_host + "/file?storage=" + settings.target_store + settings.annotation_path + "/" + file_name + ".json";
                     loadAnnotations(annotation_url);
                 },
                 error: function() {
@@ -206,7 +216,7 @@ function imagesInit (height_delta, vocabulary) {
                         ]
                     });
                     annotation.setDrawingTool(settings.draw_type);
-                    var annotation_url = "http://" + service_host + "/file?storage=" + settings.store + settings.annotation_path + "/" + file_name + ".json";
+                    var annotation_url = "http://" + service_host + "/file?storage=" + settings.target_store + settings.annotation_path + "/" + file_name + ".json";
                     loadAnnotations(annotation_url);
                 },
                 error: function() {
@@ -229,7 +239,7 @@ function imagesInit (height_delta, vocabulary) {
             file_form.append("up_file", file);
             $.ajax({
                 type: "POST",
-                url:  "http://" + service_host + "/file?storage=" + settings.source.match("ldfs://[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+")[0] + file_path,
+                url:  "http://" + service_host + "/file?storage=" + settings.target_store + file_path,
                 data: file_form,
                 contentType: false,
                 processData: false,
@@ -291,6 +301,15 @@ function imagesInit (height_delta, vocabulary) {
                 }
             }
         });
+    }
+
+    function autoGenerateTarget() {
+        var source = $settings_source.val();
+        if (source != "") {
+            $settings_target.val(source + settings.annotation_suffix);
+        } else {
+            $settings_target.val("");
+        }
     }
 
     function resetModal(e) {
