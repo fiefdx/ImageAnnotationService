@@ -60,6 +60,9 @@ function imagesInit (height_delta, vocabulary) {
                                 if (data.result != "ok") {
                                     showWarningToast("operation failed", data.message);
                                 }
+                                if (annotation) {
+                                    annotation.destroy();
+                                }
                                 var img = new Image();
                                 img.id = "annotation_image";
                                 img.src = image_url;
@@ -73,9 +76,6 @@ function imagesInit (height_delta, vocabulary) {
                                 $("span#total-images").text(settings.total);
                                 $("#input-resource input").val(settings.file_path + "/" + file_name);
                                 $("#output-resource input").val(settings.annotation_path + "/" + file_name + ".json");
-                                if (annotation) {
-                                    annotation.destroy();
-                                }
                                 annotation = Annotorious.init({
                                     image: 'annotation_image',
                                     locale: 'auto',
