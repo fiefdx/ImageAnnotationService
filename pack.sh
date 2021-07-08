@@ -23,9 +23,9 @@ cd ../..
 if [ "$target" == "tar.gz" ]
 then
     echo "pack tar.gz package"
-    tar cvzf ./image_annotation_service.tar.gz image_annotation_service
+    tar --exclude='./image_annotation_service/.git' --exclude='./image_annotation_service/.gitignore' -cvzf ./image_annotation_service.tar.gz ./image_annotation_service
 else
     echo "pack zip package"
-    zip -r ./image_annotation_service.zip image_annotation_service
+    zip -r ./image_annotation_service.zip ./image_annotation_service -x '*.git*'
 fi;
 echo "end pack application"
