@@ -179,6 +179,14 @@ class RemoteStorage(object):
             LOG.exception(e)
         return result
 
+    def upload_file_by_content(self, content, target_path, replica = 1):
+        result = False
+        try:
+            result = self.client.create_file_by_content(content, target_path, replica = replica)
+        except Exception as e:
+            LOG.exception(e)
+        return result
+
     def update_file(self, file_path, replica = 1):
         result = False
         try:
@@ -214,6 +222,14 @@ class RemoteStorage(object):
             fp = self.client.open_remote_file(file_path)
             if fp:
                 result = fp.read()
+        except Exception as e:
+            LOG.exception(e)
+        return result
+
+    def exists_file(self, file_path):
+        result = False
+        try:
+            result = self.client.info_file(file_path)
         except Exception as e:
             LOG.exception(e)
         return result

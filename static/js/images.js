@@ -39,7 +39,7 @@ function imagesInit (height_delta) {
             if (settings.source) {
                 $.ajax({
                     dataType: "json",
-                    url: "http://" + service_host + "/files?storage=" + settings.source + "&offset=0&limit=5",
+                    url: "http://" + service_host + "/images?storage=" + settings.source + "&offset=0&limit=5",
                     success: function(data) {
                         if (data.result != "ok") {
                             showWarningToast("operation failed", data.message);
@@ -47,7 +47,7 @@ function imagesInit (height_delta) {
                         settings.total = data.total;
                         settings.file_path = data.path;
                         settings.annotation_path = data.path + settings.annotation_suffix;
-                        var image_url = "http://" + service_host + "/file?storage=" + settings.source + "&number=1";
+                        var image_url = "http://" + service_host + "/image?storage=" + settings.source + "&number=1";
                         $.ajax({
                             url: image_url + "&info=true",
                             processData: false,
@@ -63,7 +63,6 @@ function imagesInit (height_delta) {
                                 $annotation_window.append(img);
                                 var file_name = data["file"]["name"];
                                 var file_path = data["file_path"];
-                                console.log(file_name, file_path);
                                 settings.current = 1;
                                 $("span#current-image").text(settings.current);
                                 $("span#total-images").text(settings.total);
@@ -109,7 +108,7 @@ function imagesInit (height_delta) {
             } else {
                 settings.current = settings.total;
             }
-            var image_url = "http://" + service_host + "/file?storage=" + settings.source + "&number=" + settings.current;
+            var image_url = "http://" + service_host + "/image?storage=" + settings.source + "&number=" + settings.current;
             $.ajax({
                 url: image_url + "&info=true",
                 processData: false,
@@ -158,7 +157,7 @@ function imagesInit (height_delta) {
             } else {
                 settings.current = 1;
             }
-            var image_url = "http://" + service_host + "/file?storage=" + settings.source + "&number=" + settings.current;
+            var image_url = "http://" + service_host + "/image?storage=" + settings.source + "&number=" + settings.current;
             $.ajax({
                 url: image_url + "&info=true",
                 processData: false,
@@ -201,7 +200,32 @@ function imagesInit (height_delta) {
     }
 
     function saveAnnotation() {
-
+        if (annotation) {
+            var file_path = $("#output-resource input").val();
+            var annotations = annotation.getAnnotations();
+            var content = JSON.stringify(annotations, undefined, 4);
+            var blob = new Blob([content], {type: "text/plain"});
+            var file = new File([blob], "up_file", {type: "text/plain"});
+            var file_form = new FormData();
+            file_form.append("up_file", file);
+            $.ajax({
+                type: "POST",
+                url:  "http://" + service_host + "/file?storage=" + settings.source.match("ldfs://[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+")[0] + file_path,
+                data: file_form,
+                contentType: false,
+                processData: false,
+                success: function(data) {
+                    if (data.result != "ok") {
+                        showWarningToast("operation failed", data.message);
+                    } else {
+                        showMessageToast("success", "save file successed");
+                    }
+                },
+                error: function() {
+                    showWarningToast("error", "request service failed");
+                }
+            });
+        }
     }
 
     function resetModal(e) {

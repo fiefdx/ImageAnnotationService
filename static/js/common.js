@@ -2,6 +2,9 @@ var $ul_pagination = $('#ul-pagination');
 var $warning_toast = $('#warning_toast');
 var $warning_brief = $('#warning_toast #brief_info');
 var $warning_detail = $('#warning_toast #detail_info');
+var $message_toast = $('#message_toast');
+var $message_brief = $('#message_toast #brief_info');
+var $message_detail = $('#message_toast #detail_info');
 
 function showWarningToast(brief_info, detail_info) {
     $warning_brief[0].innerText = brief_info;
@@ -11,6 +14,16 @@ function showWarningToast(brief_info, detail_info) {
 
 function hideWarningToast() {
     $warning_toast.toast('hide');
+}
+
+function showMessageToast(brief_info, detail_info) {
+    $message_brief[0].innerText = brief_info;
+    $message_detail[0].innerText = detail_info;
+    $message_toast.toast('show');
+}
+
+function hideMessageToast() {
+    $message_toast.toast('hide');
 }
 
 function showWaitScreen() {

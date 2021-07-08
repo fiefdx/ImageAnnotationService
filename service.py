@@ -25,8 +25,9 @@ class Application(tornado.web.Application):
     def __init__(self):
         handlers = [
             (r"/", info.HomeHandler),
+            (r"/image", data.ImageFileHandler),
+            (r"/images", data.ListImageFilesHandler),
             (r"/file", data.FileHandler),
-            (r"/files", data.ListFilesHandler),
         ]
         settings = dict(
             debug = False,

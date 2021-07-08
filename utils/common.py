@@ -52,7 +52,7 @@ class Errors(object):
         "ServerException": {"name": "ServerException", "message": "server exception"},
         "InvalidParameters": {"name": "InvalidParameters", "message": "invalid parameters"},
         "OperationFailed": {"name": "OperationFailed", "message": "operation failed"},
-        "HostNotExists": {"name": "HostNotExists", "message": "host not exists"},
+        "FileNotExists": {"name": "FileNotExists", "message": "file not exists"},
     }
 
     @classmethod
