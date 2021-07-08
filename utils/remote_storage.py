@@ -16,6 +16,7 @@ LOG = logging.getLogger(__name__)
 
 class RemoteStorage(object):
     cache = {}
+    zip_cache = {}
 
     def __init__(self, host, port):
         self.host = host
@@ -70,56 +71,66 @@ class RemoteStorage(object):
         return items, total
 
     def listzip(self, zip_file_path, sort_by = "name", desc = False, offset = 0, limit = -1, only_files = False, expiration = 3600):
+        result = []
         dirs = []
         files = []
         total = 0
         try:
-            files_info = None
+            items = None
             now = time.time()
-            if zip_file_path in RemoteStorage.cache:
-                latest_use_at = RemoteStorage.cache[zip_file_path][1]
+            key = "%s:%s:%s" % (zip_file_path, sort_by, desc)
+            if key in RemoteStorage.cache:
+                latest_use_at = RemoteStorage.cache[key][1]
                 if now - latest_use_at > expiration:
-                    del RemoteStorage.cache[zip_file_path]
+                    del RemoteStorage.cache[key]
                 else:
-                    files_info = RemoteStorage.cache[zip_file_path][0]
-                    RemoteStorage.cache[zip_file_path][1] = now
-                    LOG.warning("use zip file cache")
-            if files_info is None:
+                    items = RemoteStorage.cache[key][0]
+                    RemoteStorage.cache[key][1] = now
+            if items is None:
                 rf = self.open_remote_file(zip_file_path)
                 z = zipfile.ZipFile(rf)
                 files_info = z.infolist()
-                RemoteStorage.cache[zip_file_path] = [files_info, now]
-            n = 1
-            for f in files_info:
-                if f.is_dir():
-                    if only_files:
-                        continue
-                    d_path = f.filename
-                    dirs.append({
-                        "num": n,
-                        "name": f.filename,
-                        "sha1": sha1sum(d_path),
-                        "type": "Directory",
-                        "size": f.file_size,
-                        "ctime": "",
-                        "mtime": ""
-                    })
-                else:
-                    f_path = f.filename
-                    files.append({
-                        "num": n,
-                        "name": f.filename,
-                        "sha1": sha1sum(f_path),
-                        "type": os.path.splitext(f.filename)[-1],
-                        "size": f.file_size,
-                        "ctime": "",
-                        "mtime": ""
-                    })
-                n += 1
-            items, total = listsort(dirs, files, sort_by = sort_by, desc = desc, offset = offset, limit = limit)
+                n = 1
+                for f in files_info:
+                    if f.is_dir():
+                        if only_files:
+                            continue
+                        d_path = f.filename
+                        dirs.append({
+                            "num": n,
+                            "name": f.filename,
+                            "sha1": sha1sum(d_path),
+                            "type": "Directory",
+                            "size": f.file_size,
+                            "ctime": "",
+                            "mtime": ""
+                        })
+                    else:
+                        f_path = f.filename
+                        files.append({
+                            "num": n,
+                            "name": f.filename,
+                            "sha1": sha1sum(f_path),
+                            "type": os.path.splitext(f.filename)[-1],
+                            "size": f.file_size,
+                            "ctime": "",
+                            "mtime": ""
+                        })
+                    n += 1
+                items, total = listsort(dirs, files, sort_by = sort_by, desc = desc, offset = 0, limit = -1)
+                RemoteStorage.cache[key] = [items, now]
+            total = len(items)
+            if offset > 0 and limit > 0:
+                result = items[offset:offset + limit]
+            elif offset > 0:
+                result = items[offset:]
+            elif limit > 0:
+                result = items[:limit]
+            else:
+                result = items
         except Exception as e:
             LOG.exception(e)
-        return items, total
+        return result, total
 
     def list_storage(self, home_path, dir_path, sort_by = "name", desc = False, offset = 0, limit = -1):
         data = {}
@@ -283,14 +294,27 @@ class RemoteStorage(object):
             LOG.exception(e)
         return result
 
-    def read_zip_file(self, zip_file_path, file_path):
+    def read_zip_file(self, zip_file_path, file_path, expiration = 3600):
         result = False
         try:
-            fp = self.client.open_remote_file(zip_file_path)
-            if fp:
-                z = zipfile.ZipFile(fp)
-                file = z.open(file_path)
-                result = file.read()
+            z = None
+            now = time.time()
+            if zip_file_path in RemoteStorage.zip_cache:
+                latest_use_at = RemoteStorage.zip_cache[zip_file_path][1]
+                if now - latest_use_at > expiration:
+                    del RemoteStorage.zip_cache[zip_file_path]
+                else:
+                    z = RemoteStorage.zip_cache[zip_file_path][0]
+                    RemoteStorage.zip_cache[zip_file_path][1] = now
+            if z is None:
+                fp = self.client.open_remote_file(zip_file_path)
+                if fp:
+                    z = zipfile.ZipFile(fp)
+                    RemoteStorage.zip_cache[zip_file_path] = [z, now]
+                else:
+                    return result
+            file = z.open(file_path)
+            result = file.read()
         except Exception as e:
             LOG.exception(e)
         return result
@@ -298,7 +322,9 @@ class RemoteStorage(object):
     def exists_file(self, file_path):
         result = False
         try:
-            result = self.client.info_file(file_path)
+            r = self.client.info_path(file_path)
+            if "info" in r and r["info"]["exists"] and r["info"]["type"] == "file":
+                result = True
         except Exception as e:
             LOG.exception(e)
         return result

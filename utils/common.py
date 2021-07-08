@@ -6,6 +6,7 @@ import json
 import hashlib
 import logging
 import datetime
+from copy import deepcopy
 
 from tornado import ioloop
 from tornado import gen
@@ -160,7 +161,7 @@ def listsort(dirs, files, sort_by = "name", desc = False, offset = 0, limit = -1
     files_tree = {}
     files_sort = []
     result = []
-    for d in dirs:
+    for d in deepcopy(dirs):
         dirs_keys.append(d[sort_by])
         if d[sort_by] in dirs_tree:
             dirs_tree[d[sort_by]].append(d)
@@ -177,7 +178,7 @@ def listsort(dirs, files, sort_by = "name", desc = False, offset = 0, limit = -1
             d["size"] = get_file_size(d["size"])
             dirs_sort.append(d)
             n += 1
-    for f in files:
+    for f in deepcopy(files):
         files_keys.append(f[sort_by])
         if f[sort_by] in files_tree:
             files_tree[f[sort_by]].append(f)
