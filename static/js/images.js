@@ -1,5 +1,7 @@
 function imagesInit (height_delta, vocabulary) {
     var scrollBarSize = getBrowserScrollSize();
+    var $current_image = $("input#current-image");
+    var $total_images = $("input#total-images");
     var $show_annotations = $("input#show-annotations");
     var $btn_previous = $("#btn_previous");
     var $interval = $("input#interval");
@@ -29,6 +31,8 @@ function imagesInit (height_delta, vocabulary) {
     var service_host = window.location.host;
     var annotation = null;
 
+    $current_image.val(settings.current);
+    $total_images.val(settings.total);
     $show_annotations.prop("checked", settings.show);
     $interval.val(settings.interval);
     $("#input-resource input").val("");
@@ -43,6 +47,7 @@ function imagesInit (height_delta, vocabulary) {
     $show_annotations.on('change', switchShowAnnotations);
     $settings_source.on('change', autoGenerateTarget);
     $interval.on('change', changeInterval);
+    $current_image.on('change', gotoImage);
 
     function showSettings() {
         if (settings.source) {
@@ -94,8 +99,8 @@ function imagesInit (height_delta, vocabulary) {
                                 var file_name = data["file"]["name"];
                                 var file_path = data["file_path"];
                                 settings.current = 1;
-                                $("span#current-image").text(settings.current);
-                                $("span#total-images").text(settings.total);
+                                $("input#current-image").val(settings.current);
+                                $("input#total-images").val(settings.total);
                                 $("#input-resource input").val(settings.file_path + "/" + file_name);
                                 $("#output-resource input").val(settings.annotation_path + "/" + file_name + ".json");
                                 annotation = Annotorious.init({
@@ -122,12 +127,63 @@ function imagesInit (height_delta, vocabulary) {
             }
         }
         if (source == "") {
-            $("span#current-image").text(0);
-            $("span#total-images").text(0);
+            $("input#current-image").val(0);
+            $("input#total-images").val(0);
             $("#input-resource input").val("");
             $("#output-resource input").val("");
         }
         $('#settings_modal').modal('hide');
+    }
+
+    function gotoImage() {
+        var n = Number($(this).val());
+        if (n != settings.current) {
+            if (n < 1) {
+                n = 1;
+            } else if (n > settings.total) {
+                n = settings.total;
+            }
+            settings.current = n;
+            var image_url = "http://" + service_host + "/image?storage=" + settings.source + "&number=" + settings.current;
+            $.ajax({
+                url: image_url + "&info=true",
+                processData: false,
+                success: function(data) {
+                    if (data.result != "ok") {
+                        showWarningToast("operation failed", data.message);
+                    }
+                    if (annotation) {
+                        annotation.destroy();
+                    }
+                    var img = new Image();
+                    img.id = "annotation_image";
+                    img.src = image_url;
+                    $annotation_window.empty();
+                    img.height = $(window).height() - height_delta;
+                    $annotation_window.append(img);
+                    var file_name = data["file"]["name"];
+                    var file_path = data["file_path"];
+                    $("input#current-image").val(settings.current);
+                    $("input#total-images").val(settings.total);
+                    $("#input-resource input").val(settings.file_path + "/" + file_name);
+                    $("#output-resource input").val(settings.annotation_path + "/" + file_name + ".json");
+                    annotation = Annotorious.init({
+                        image: 'annotation_image',
+                        locale: 'auto',
+                        widgets: [
+                            {widget: 'COMMENT'},
+                            {widget: 'TAG', vocabulary: vocabulary}
+                        ]
+                    });
+                    annotation.setDrawingTool(settings.draw_type);
+                    var annotation_url = "http://" + service_host + "/file?storage=" + settings.target_store + settings.annotation_path + "/" + file_name + ".json";
+                    loadAnnotations(annotation_url);
+                },
+                error: function() {
+                    showWarningToast("error", "request file failed");
+                }
+            });
+        }
     }
 
     function previousImage() {
@@ -156,8 +212,8 @@ function imagesInit (height_delta, vocabulary) {
                     $annotation_window.append(img);
                     var file_name = data["file"]["name"];
                     var file_path = data["file_path"];
-                    $("span#current-image").text(settings.current);
-                    $("span#total-images").text(settings.total);
+                    $("input#current-image").val(settings.current);
+                    $("input#total-images").val(settings.total);
                     $("#input-resource input").val(settings.file_path + "/" + file_name);
                     $("#output-resource input").val(settings.annotation_path + "/" + file_name + ".json");
                     annotation = Annotorious.init({
@@ -207,8 +263,8 @@ function imagesInit (height_delta, vocabulary) {
                     $annotation_window.append(img);
                     var file_name = data["file"]["name"];
                     var file_path = data["file_path"];
-                    $("span#current-image").text(settings.current);
-                    $("span#total-images").text(settings.total);
+                    $("input#current-image").val(settings.current);
+                    $("input#total-images").val(settings.total);
                     $("#input-resource input").val(settings.file_path + "/" + file_name);
                     $("#output-resource input").val(settings.annotation_path + "/" + file_name + ".json");
                     annotation = Annotorious.init({

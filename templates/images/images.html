@@ -5,7 +5,9 @@
     <div id="toolbar-row" class="row">
         <div id="toolbar-col" class="col">
             <div id="toolbar-left" class="btn-group btn-group-sm float-left" role="group" aria-label="toolbar-left">
-                <span id="current-image"></span><span> / </span><span id="total-images"></span>
+                <input type="number" name="current-image" class="form-control form-control-sm" id="current-image" min="0">
+                <span> / </span>
+                <input type="number" name="total-images" class="form-control form-control-sm" id="total-images" min="0" readonly>
             </div>
             <div id="toolbar-right" class="btn-group btn-group-sm float-right" role="group" aria-label="toolbar-right">
                 <div class="custom-control custom-switch btn">

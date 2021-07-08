@@ -46,8 +46,24 @@ label.btn-sm {
 }
 
 input#interval {
+    width: 50px;
+}
+
+input#current-image,
+input#total-images {
     width: 80px;
 }
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
 
 
 
