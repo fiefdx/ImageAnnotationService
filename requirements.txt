@@ -1,5 +1,5 @@
 venv-pack
 litepipeline_helper
-litedfs_client == 0.0.8
+litedfs_client >= 0.0.9
 tornado
 PyYAML
