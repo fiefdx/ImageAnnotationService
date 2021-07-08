@@ -159,7 +159,7 @@
         var window_height = $(window).height();
         var window_width = $(window).width();
         $("#annotation-window-container img").height(window_height - height_delta);
-        imagesInit(height_delta);
+        imagesInit(height_delta, ['Dialog', 'Vehicle', 'People']);
     });
 </script>
 {% end %}

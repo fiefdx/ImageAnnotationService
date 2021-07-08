@@ -1,4 +1,4 @@
-function imagesInit (height_delta) {
+function imagesInit (height_delta, vocabulary) {
     var scrollBarSize = getBrowserScrollSize();
     var $btn_previous = $("#btn_previous");
     var $btn_next = $("#btn_next");
@@ -8,6 +8,7 @@ function imagesInit (height_delta) {
     var $annotation_window = $("#annotation-window-container");
     var settings = {
         source: "",
+        store: "",
         current: 0,
         total: 0,
         file_path: "",
@@ -37,6 +38,7 @@ function imagesInit (height_delta) {
         if (source != settings.source) {
             settings.source = source;
             if (settings.source) {
+                settings.store = settings.source.match("ldfs://[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+")[0];
                 $.ajax({
                     dataType: "json",
                     url: "http://" + service_host + "/images?storage=" + settings.source + "&offset=0&limit=5",
@@ -76,10 +78,21 @@ function imagesInit (height_delta) {
                                     locale: 'auto',
                                     widgets: [
                                         {widget: 'COMMENT'},
-                                        {widget: 'TAG', vocabulary: ['Dialog', 'Vehicle', 'People']}
+                                        {widget: 'TAG', vocabulary: vocabulary}
                                     ]
                                 });
                                 annotation.setDrawingTool('polygon');
+                                var annotation_url = "http://" + service_host + "/file?storage=" + settings.store + settings.annotation_path + "/" + file_name + ".json";
+                                $.ajax({
+                                    type: "HEAD",
+                                    url: annotation_url,
+                                    processData: false,
+                                    success: function(data, textStatus, request) {
+                                        if (request.getResponseHeader("Exists") == "true") {
+                                            annotation.loadAnnotations(annotation_url);
+                                        }
+                                    }
+                                });
                             },
                             error: function() {
                                 showWarningToast("error", "request file failed");
@@ -136,10 +149,21 @@ function imagesInit (height_delta) {
                         locale: 'auto',
                         widgets: [
                             {widget: 'COMMENT'},
-                            {widget: 'TAG', vocabulary: ['Dialog', 'Vehicle', 'People']}
+                            {widget: 'TAG', vocabulary: vocabulary}
                         ]
                     });
                     annotation.setDrawingTool('polygon');
+                    var annotation_url = "http://" + service_host + "/file?storage=" + settings.store + settings.annotation_path + "/" + file_name + ".json";
+                    $.ajax({
+                        type: "HEAD",
+                        url: annotation_url,
+                        processData: false,
+                        success: function(data, textStatus, request) {
+                            if (request.getResponseHeader("Exists") == "true") {
+                                annotation.loadAnnotations(annotation_url);
+                            }
+                        }
+                    });
                 },
                 error: function() {
                     showWarningToast("error", "request file failed");
@@ -185,10 +209,21 @@ function imagesInit (height_delta) {
                         locale: 'auto',
                         widgets: [
                             {widget: 'COMMENT'},
-                            {widget: 'TAG', vocabulary: ['Dialog', 'Vehicle', 'People']}
+                            {widget: 'TAG', vocabulary: vocabulary}
                         ]
                     });
                     annotation.setDrawingTool('polygon');
+                    var annotation_url = "http://" + service_host + "/file?storage=" + settings.store + settings.annotation_path + "/" + file_name + ".json";
+                    $.ajax({
+                        type: "HEAD",
+                        url: annotation_url,
+                        processData: false,
+                        success: function(data, textStatus, request) {
+                            if (request.getResponseHeader("Exists") == "true") {
+                                annotation.loadAnnotations(annotation_url);
+                            }
+                        }
+                    });
                 },
                 error: function() {
                     showWarningToast("error", "request file failed");

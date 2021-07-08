@@ -110,6 +110,44 @@ class ImageFileHandler(BaseHandler):
 
 class FileHandler(BaseHandler):
     @gen.coroutine
+    def head(self):
+        self.set_header('Exists', 'false')
+        try:
+            storage = self.get_argument("storage", "")
+            if storage:
+                u = urllib.parse.urlparse(storage)
+                file_path = u.path
+                host = u.hostname
+                port = u.port
+                scheme = u.scheme
+                if file_path and host and port:
+                    if scheme.lower() == "ldfs":
+                        c = RemoteStorage(host, port)
+                        exists = c.exists_file(file_path)
+                        if exists:
+                            self.set_header('Exists', 'true')
+                    else:
+                        self.set_header('Error', 'InvalidParameters')
+                        self.set_status(500)
+                else:
+                    self.set_header('Error', 'InvalidParameters')
+                    self.set_status(500)
+            else:
+                self.set_header('Error', 'InvalidParameters')
+                self.set_status(500)
+        except InvalidValueError as e:
+            LOG.error(e)
+            Errors.set_result_error("InvalidParameters", result)
+            self.set_header('Error', 'InvalidParameters')
+            self.set_status(500)
+        except Exception as e:
+            LOG.exception(e)
+            Errors.set_result_error("ServerException", result)
+            self.set_header('Error', 'ServerException')
+            self.set_status(500)
+        self.finish()
+
+    @gen.coroutine
     def get(self):
         result = {"result": Errors.OK}
         try:
