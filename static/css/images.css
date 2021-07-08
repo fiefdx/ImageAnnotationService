@@ -45,6 +45,10 @@ label.btn-sm {
     box-shadow: none;
 }
 
+input#interval {
+    width: 80px;
+}
+
 
 
 tr {

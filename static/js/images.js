@@ -2,6 +2,7 @@ function imagesInit (height_delta, vocabulary) {
     var scrollBarSize = getBrowserScrollSize();
     var $show_annotations = $("input#show-annotations");
     var $btn_previous = $("#btn_previous");
+    var $interval = $("input#interval");
     var $btn_next = $("#btn_next");
     var $btn_save = $("#btn_save");
     var $btn_settings = $("#btn_settings");
@@ -22,12 +23,14 @@ function imagesInit (height_delta, vocabulary) {
         annotation_suffix: "_annotation",
         draw_type: "rect",
         show: true,
-        cache: []
+        cache: [],
+        interval: 1
     };
     var service_host = window.location.host;
     var annotation = null;
 
     $show_annotations.prop("checked", settings.show);
+    $interval.val(settings.interval);
     $("#input-resource input").val("");
     $("#output-resource input").val("");
     $btn_previous.bind('click', previousImage);
@@ -39,6 +42,7 @@ function imagesInit (height_delta, vocabulary) {
     $btn_draw_type.bind('click', updateDrawType);
     $show_annotations.on('change', switchShowAnnotations);
     $settings_source.on('change', autoGenerateTarget);
+    $interval.on('change', changeInterval);
 
     function showSettings() {
         if (settings.source) {
@@ -128,8 +132,8 @@ function imagesInit (height_delta, vocabulary) {
 
     function previousImage() {
         if (settings.source) {
-            if (settings.current > 1) {
-                settings.current -= 1;
+            if (settings.current > settings.interval) {
+                settings.current -= settings.interval;
             } else {
                 settings.current = settings.total;
             }
@@ -179,8 +183,8 @@ function imagesInit (height_delta, vocabulary) {
 
     function nextImage() {
         if (settings.source) {
-            if (settings.current < settings.total) {
-                settings.current += 1;
+            if (settings.current + settings.interval < settings.total) {
+                settings.current += settings.interval;
             } else {
                 settings.current = 1;
             }
@@ -310,6 +314,14 @@ function imagesInit (height_delta, vocabulary) {
         } else {
             $settings_target.val("");
         }
+    }
+
+    function changeInterval() {
+        settings.interval = Number($(this).val());
+        if (settings.interval < 1) {
+            settings.interval = 1;
+        }
+        $(this).val(settings.interval);
     }
 
     function resetModal(e) {
