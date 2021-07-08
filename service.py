@@ -12,6 +12,7 @@ from litepipeline_helper.models.action import Action
 
 from handlers import info
 from handlers import data
+from utils.remote_storage import RemoteStorage
 from utils import common
 import logger
 from config import CONFIG
@@ -58,6 +59,9 @@ if __name__ == "__main__":
         CONFIG["data_path"] = workspace
         CONFIG["http_host"] = input_data["http_host"]
         CONFIG["http_port"] = input_data["http_port"]
+        CONFIG["cache_ttl"] = input_data["cache_ttl"]
+        CONFIG["cache_check_interval"] = input_data["cache_check_interval"]
+        RemoteStorage.ioloop_service(interval = CONFIG["cache_check_interval"])
         http_server = tornado.httpserver.HTTPServer(
             Application(),
             max_buffer_size = CONFIG["max_buffer_size"],

@@ -7,7 +7,9 @@ import logging
 import datetime
 import zipfile
 
+from tornado import gen, ioloop
 from litedfs_client.client import LiteDFSClient
+
 from utils.common import joinpath, splitpath, listsort, sha1sum
 from config import CONFIG
 
@@ -17,6 +19,37 @@ LOG = logging.getLogger(__name__)
 class RemoteStorage(object):
     cache = {}
     zip_cache = {}
+
+    @classmethod
+    def ioloop_service(cls, interval = 5):
+        cls.periodic_cache_service = ioloop.PeriodicCallback(
+            cls.cache_manager_service, 
+            interval * 1000
+        )
+        cls.periodic_cache_service.start()
+
+    @classmethod
+    @gen.coroutine
+    def cache_manager_service(cls):
+        try:
+            now = time.time()
+            expired_cache_keys = []
+            for k in cls.cache:
+                if now - cls.cache[k][1] > CONFIG["cache_ttl"]:
+                    expired_cache_keys.append(k)
+            for k in expired_cache_keys:
+                del cls.cache[k]
+                LOG.debug("cache[%s] expired", k)
+            expired_zip_cache_keys = []
+            for k in cls.zip_cache:
+                if now - cls.zip_cache[k][1] > CONFIG["cache_ttl"]:
+                    expired_zip_cache_keys.append(k)
+            for k in expired_zip_cache_keys:
+                del cls.zip_cache[k]
+                LOG.debug("zip cache[%s] expired", k)
+            LOG.debug("cache manage routine ...")
+        except Exception as e:
+            LOG.exception(e)
 
     def __init__(self, host, port):
         self.host = host
