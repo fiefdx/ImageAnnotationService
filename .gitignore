@@ -15,6 +15,7 @@
 *.pdf
 *.db
 .DS_Store
+*.whl
 
 # ignore dirs
 

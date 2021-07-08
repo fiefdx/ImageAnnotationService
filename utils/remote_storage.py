@@ -23,8 +23,9 @@ class RemoteStorage(object):
     def listdir(self, dir_path, sort_by = "name", desc = False, offset = 0, limit = -1, only_files = False):
         dirs = []
         files = []
+        total = 0
         try:
-            r = self.client.list_directory(dir_path)
+            r = self.client.list_directory(dir_path, offset = offset, limit = limit, include_directory = only_files)
             if r:
                 if "result" in r and r["result"] == "ok":
                     n = 1
@@ -59,7 +60,8 @@ class RemoteStorage(object):
                                 f["replica"] = c["replica"]
                             files.append(f)
                         n += 1
-                    items, total = listsort(dirs, files, sort_by = sort_by, desc = desc, offset = offset, limit = limit)
+                    total = r["total"]
+                    items, _ = listsort(dirs, files, sort_by = sort_by, desc = desc)
         except Exception as e:
             LOG.exception(e)
         return items, total
