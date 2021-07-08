@@ -15,6 +15,8 @@ LOG = logging.getLogger(__name__)
 
 
 class RemoteStorage(object):
+    cache = {}
+
     def __init__(self, host, port):
         self.host = host
         self.port = port
@@ -24,6 +26,7 @@ class RemoteStorage(object):
         dirs = []
         files = []
         total = 0
+        items = []
         try:
             r = self.client.list_directory(dir_path, offset = offset, limit = limit, include_directory = only_files)
             if r:
@@ -66,13 +69,26 @@ class RemoteStorage(object):
             LOG.exception(e)
         return items, total
 
-    def listzip(self, zip_file_path, sort_by = "name", desc = False, offset = 0, limit = -1, only_files = False):
+    def listzip(self, zip_file_path, sort_by = "name", desc = False, offset = 0, limit = -1, only_files = False, expiration = 3600):
         dirs = []
         files = []
+        total = 0
         try:
-            rf = self.open_remote_file(zip_file_path)
-            z = zipfile.ZipFile(rf)
-            files_info = z.infolist()
+            files_info = None
+            now = time.time()
+            if zip_file_path in RemoteStorage.cache:
+                latest_use_at = RemoteStorage.cache[zip_file_path][1]
+                if now - latest_use_at > expiration:
+                    del RemoteStorage.cache[zip_file_path]
+                else:
+                    files_info = RemoteStorage.cache[zip_file_path][0]
+                    RemoteStorage.cache[zip_file_path][1] = now
+                    LOG.warning("use zip file cache")
+            if files_info is None:
+                rf = self.open_remote_file(zip_file_path)
+                z = zipfile.ZipFile(rf)
+                files_info = z.infolist()
+                RemoteStorage.cache[zip_file_path] = [files_info, now]
             n = 1
             for f in files_info:
                 if f.is_dir():

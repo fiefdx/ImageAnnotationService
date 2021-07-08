@@ -155,12 +155,9 @@ function imagesInit (height_delta, vocabulary) {
                     if (annotation) {
                         annotation.destroy();
                     }
-                    var img = new Image();
-                    img.id = "annotation_image";
+                    var img = document.getElementById("annotation_image");
                     img.src = image_url;
-                    $annotation_window.empty();
                     img.height = $(window).height() - height_delta;
-                    $annotation_window.append(img);
                     var file_name = data["file"]["name"];
                     var file_path = data["file_path"];
                     $("input#current-image").val(settings.current);
@@ -204,12 +201,9 @@ function imagesInit (height_delta, vocabulary) {
                     if (annotation) {
                         annotation.destroy();
                     }
-                    var img = new Image();
-                    img.id = "annotation_image";
+                    var img = document.getElementById("annotation_image");
                     img.src = image_url;
-                    $annotation_window.empty();
                     img.height = $(window).height() - height_delta;
-                    $annotation_window.append(img);
                     var file_name = data["file"]["name"];
                     var file_path = data["file_path"];
                     $("input#current-image").val(settings.current);
@@ -255,12 +249,9 @@ function imagesInit (height_delta, vocabulary) {
                     if (annotation) {
                         annotation.destroy();
                     }
-                    var img = new Image();
-                    img.id = "annotation_image";
+                    var img = document.getElementById("annotation_image");
                     img.src = image_url;
-                    $annotation_window.empty();
                     img.height = $(window).height() - height_delta;
-                    $annotation_window.append(img);
                     var file_name = data["file"]["name"];
                     var file_path = data["file_path"];
                     $("input#current-image").val(settings.current);
