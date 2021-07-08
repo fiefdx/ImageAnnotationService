@@ -17,7 +17,8 @@ function imagesInit (height_delta, vocabulary) {
         annotation_path: "",
         annotation_suffix: "_annotation",
         draw_type: "rect",
-        show: true
+        show: true,
+        cache: []
     };
     var service_host = window.location.host;
     var annotation = null;
@@ -92,19 +93,8 @@ function imagesInit (height_delta, vocabulary) {
                                     ]
                                 });
                                 annotation.setDrawingTool(settings.draw_type);
-                                if (settings.show) {
-                                    var annotation_url = "http://" + service_host + "/file?storage=" + settings.store + settings.annotation_path + "/" + file_name + ".json";
-                                    $.ajax({
-                                        type: "HEAD",
-                                        url: annotation_url,
-                                        processData: false,
-                                        success: function(data, textStatus, request) {
-                                            if (request.getResponseHeader("Exists") == "true") {
-                                                annotation.loadAnnotations(annotation_url);
-                                            }
-                                        }
-                                    });
-                                }
+                                var annotation_url = "http://" + service_host + "/file?storage=" + settings.store + settings.annotation_path + "/" + file_name + ".json";
+                                loadAnnotations(annotation_url);
                             },
                             error: function() {
                                 showWarningToast("error", "request file failed");
@@ -165,19 +155,8 @@ function imagesInit (height_delta, vocabulary) {
                         ]
                     });
                     annotation.setDrawingTool(settings.draw_type);
-                    if (settings.show) {
-                        var annotation_url = "http://" + service_host + "/file?storage=" + settings.store + settings.annotation_path + "/" + file_name + ".json";
-                        $.ajax({
-                            type: "HEAD",
-                            url: annotation_url,
-                            processData: false,
-                            success: function(data, textStatus, request) {
-                                if (request.getResponseHeader("Exists") == "true") {
-                                    annotation.loadAnnotations(annotation_url);
-                                }
-                            }
-                        });
-                    }
+                    var annotation_url = "http://" + service_host + "/file?storage=" + settings.store + settings.annotation_path + "/" + file_name + ".json";
+                    loadAnnotations(annotation_url);
                 },
                 error: function() {
                     showWarningToast("error", "request file failed");
@@ -227,19 +206,8 @@ function imagesInit (height_delta, vocabulary) {
                         ]
                     });
                     annotation.setDrawingTool(settings.draw_type);
-                    if (settings.show) {
-                        var annotation_url = "http://" + service_host + "/file?storage=" + settings.store + settings.annotation_path + "/" + file_name + ".json";
-                        $.ajax({
-                            type: "HEAD",
-                            url: annotation_url,
-                            processData: false,
-                            success: function(data, textStatus, request) {
-                                if (request.getResponseHeader("Exists") == "true") {
-                                    annotation.loadAnnotations(annotation_url);
-                                }
-                            }
-                        });
-                    }
+                    var annotation_url = "http://" + service_host + "/file?storage=" + settings.store + settings.annotation_path + "/" + file_name + ".json";
+                    loadAnnotations(annotation_url);
                 },
                 error: function() {
                     showWarningToast("error", "request file failed");
@@ -283,19 +251,11 @@ function imagesInit (height_delta, vocabulary) {
         var enable = $(this).is(":checked");
         settings.show = enable;
         if (enable) {
-            var annotation_path = $("#output-resource input").val();
-            var annotation_url = "http://" + service_host + "/file?storage=" + settings.store + annotation_path;
-            $.ajax({
-                type: "HEAD",
-                url: annotation_url,
-                processData: false,
-                success: function(data, textStatus, request) {
-                    if (request.getResponseHeader("Exists") == "true") {
-                        annotation.loadAnnotations(annotation_url);
-                    }
-                }
-            });
+            var tmp = annotation.getAnnotations();
+            settings.cache = settings.cache.concat(tmp);
+            annotation.setAnnotations(settings.cache);
         } else {
+            settings.cache = annotation.getAnnotations();
             annotation.clearAnnotations();
         }
     }
@@ -306,6 +266,31 @@ function imagesInit (height_delta, vocabulary) {
             annotation.setDrawingTool(settings.draw_type);
         }
         $("#draw-type-selector label").removeClass("focus");
+    }
+
+    function loadAnnotations(annotation_url) {
+        $.ajax({
+            type: "HEAD",
+            url: annotation_url,
+            processData: false,
+            success: function(data, textStatus, request) {
+                if (request.getResponseHeader("Exists") == "true") {
+                    $.ajax({
+                        type: "GET",
+                        url: annotation_url,
+                        processData: false,
+                        success: function(data) {
+                            settings.cache = JSON.parse(data);
+                            if (settings.show) {
+                                annotation.setAnnotations(settings.cache);
+                            }
+                        }
+                    });
+                } else {
+                    settings.cache = [];
+                }
+            }
+        });
     }
 
     function resetModal(e) {
