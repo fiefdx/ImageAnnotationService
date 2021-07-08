@@ -3,12 +3,13 @@
 import os
 import urllib
 import logging
+import zipfile
 
 from tornado import gen
 
 from handlers.base import BaseWebHandler, BaseHandler, BaseSocketHandler
 from utils.remote_storage import RemoteStorage
-from utils.common import Errors
+from utils.common import Errors, InvalidValueError
 from config import CONFIG
 
 LOG = logging.getLogger("__name__")
@@ -33,7 +34,20 @@ class ListImageFilesHandler(BaseHandler):
                 if dir_path and host and port:
                     if scheme.lower() == "ldfs":
                         c = RemoteStorage(host, port)
-                        files, total = c.listdir(dir_path, sort_by = sort_by, desc = True if sort_order == "desc" else False, offset = offset, limit = limit, only_files = True)
+                        files = []
+                        total = 0
+                        exists = c.exists_file(dir_path)
+                        if exists:
+                            rf = c.open_remote_file(dir_path)
+                            z = zipfile.ZipFile(rf)
+                            names = z.namelist()
+                            for n in names:
+                                if not n.endswith("/"):
+                                    files.append(n)
+                            files.sort(reverse = True if sort_order == "desc" else False)
+                            total = len(files)
+                        else:
+                            files, total = c.listdir(dir_path, sort_by = sort_by, desc = True if sort_order == "desc" else False, offset = offset, limit = limit, only_files = True)
                         result["path"] = dir_path
                         result["files"] = files
                         result["offset"] = offset
@@ -74,13 +88,33 @@ class ImageFileHandler(BaseHandler):
                 if dir_path and host and port and number > 0:
                     if scheme.lower() == "ldfs":
                         c = RemoteStorage(host, port)
-                        files, total = c.listdir(dir_path, sort_by = sort_by, desc = True if sort_order == "desc" else False, offset = number - 1, limit = 1, only_files = True)
+                        files = []
+                        exists = False
+                        z = None
+                        file_path = ""
+                        exists = c.exists_file(dir_path)
+                        if exists:
+                            rf = c.open_remote_file(dir_path)
+                            z = zipfile.ZipFile(rf)
+                            names = z.namelist()
+                            for n in names:
+                                if not n.endswith("/"):
+                                    files.append(n)
+                            files.sort(reverse = True if sort_order == "desc" else False)
+                            file_path = files[number - 1]
+                            files = [{"name": files[number - 1], "size": 0}]
+                        else:
+                            files, _ = c.listdir(dir_path, sort_by = sort_by, desc = True if sort_order == "desc" else False, offset = number - 1, limit = 1, only_files = True)
                         file = files[0]
                         if info:
                             result["file"] = file
                             result["file_path"] = os.path.join(dir_path, file["name"])
                         else:
-                            content = c.read_file(os.path.join(dir_path, file["name"]))
+                            if exists:
+                                fp = z.open(file_path)
+                                content = fp.read()
+                            else:
+                                content = c.read_file(os.path.join(dir_path, file["name"]))
                             if content is not False:
                                 self.set_header('Content-Type', 'image/jpeg')
                                 self.set_header('Content-Disposition', 'attachment; filename=%s' % file["name"])

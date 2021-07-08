@@ -95,6 +95,11 @@ class MetaNotDictError(Exception):
         self.message = message
 
 
+class InvalidValueError(Exception):
+    def __init__(self, message):
+        self.message = message
+
+
 def sha1sum(content):
     sha1 = hashlib.sha1()
     sha1.update(content.encode("utf-8"))

@@ -233,3 +233,6 @@ class RemoteStorage(object):
         except Exception as e:
             LOG.exception(e)
         return result
+
+    def open_remote_file(self, file_path):
+        return self.client.open_remote_file(file_path)
