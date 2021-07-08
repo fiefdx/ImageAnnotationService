@@ -8,12 +8,10 @@
                 <span id="current-image"></span><span> / </span><span id="total-images"></span>
             </div>
             <div id="toolbar-right" class="btn-group btn-group-sm float-right" role="group" aria-label="toolbar-right">
-                <button id="btn_previous" type="button" class="btn btn-light" onclick="this.blur();">
-                    <span class="oi oi-chevron-left" title="previous" aria-hidden="true"></span>
-                </button>
-                <button id="btn_next" type="button" class="btn btn-light" onclick="this.blur();">
-                    <span class="oi oi-chevron-right" title="next" aria-hidden="true"></span>
-                </button>
+                <div class="custom-control custom-switch btn">
+                    <input type="checkbox" class="custom-control-input" id="show-annotations">
+                    <label class="custom-control-label" for="show-annotations">Show</label>
+                </div>
                 <div id="draw-type-selector" class="btn-group btn-group-toggle" data-toggle="buttons">
                     <label class="btn btn-secondary btn-sm active">
                         <input type="radio" name="draw-type" id="rect" autocomplete="off" checked>Rectangle
@@ -22,6 +20,12 @@
                         <input type="radio" name="draw-type" id="polygon" autocomplete="off">Polygon
                     </label>
                 </div>
+                <button id="btn_previous" type="button" class="btn btn-light" onclick="this.blur();">
+                    <span class="oi oi-chevron-left" title="previous" aria-hidden="true"></span>
+                </button>
+                <button id="btn_next" type="button" class="btn btn-light" onclick="this.blur();">
+                    <span class="oi oi-chevron-right" title="next" aria-hidden="true"></span>
+                </button>
                 <button id="btn_save" type="button" class="btn btn-light" onclick="this.blur();">
                     <span class="oi oi-cloud-upload" title="save" aria-hidden="true"></span>
                 </button>

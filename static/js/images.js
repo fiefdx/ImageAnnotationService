@@ -1,5 +1,6 @@
 function imagesInit (height_delta, vocabulary) {
     var scrollBarSize = getBrowserScrollSize();
+    var $show_annotations = $("input#show-annotations");
     var $btn_previous = $("#btn_previous");
     var $btn_next = $("#btn_next");
     var $btn_save = $("#btn_save");
@@ -15,12 +16,15 @@ function imagesInit (height_delta, vocabulary) {
         file_path: "",
         annotation_path: "",
         annotation_suffix: "_annotation",
-        draw_type: "rect"
+        draw_type: "rect",
+        show: true
     };
     var service_host = window.location.host;
-
     var annotation = null;
 
+    $show_annotations.prop("checked", settings.show);
+    $("#input-resource input").val("");
+    $("#output-resource input").val("");
     $btn_previous.bind('click', previousImage);
     $btn_next.bind('click', nextImage);
     $btn_save.bind('click', saveAnnotation);
@@ -28,6 +32,7 @@ function imagesInit (height_delta, vocabulary) {
     $("#settings_modal").on("hidden.bs.modal", resetModal);
     $btn_settings_update.bind('click', updateSettings);
     $btn_draw_type.bind('click', updateDrawType);
+    $show_annotations.on('change', switchShowAnnotations);
 
     function showSettings() {
         if (settings.source) {
@@ -40,6 +45,8 @@ function imagesInit (height_delta, vocabulary) {
         var source = $('#settings_modal input#source').val() || "";
         if (source != settings.source) {
             settings.source = source;
+            $("#input-resource input").val("");
+            $("#output-resource input").val("");
             if (settings.source) {
                 settings.store = settings.source.match("ldfs://[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+")[0];
                 $.ajax({
@@ -85,17 +92,19 @@ function imagesInit (height_delta, vocabulary) {
                                     ]
                                 });
                                 annotation.setDrawingTool(settings.draw_type);
-                                var annotation_url = "http://" + service_host + "/file?storage=" + settings.store + settings.annotation_path + "/" + file_name + ".json";
-                                $.ajax({
-                                    type: "HEAD",
-                                    url: annotation_url,
-                                    processData: false,
-                                    success: function(data, textStatus, request) {
-                                        if (request.getResponseHeader("Exists") == "true") {
-                                            annotation.loadAnnotations(annotation_url);
+                                if (settings.show) {
+                                    var annotation_url = "http://" + service_host + "/file?storage=" + settings.store + settings.annotation_path + "/" + file_name + ".json";
+                                    $.ajax({
+                                        type: "HEAD",
+                                        url: annotation_url,
+                                        processData: false,
+                                        success: function(data, textStatus, request) {
+                                            if (request.getResponseHeader("Exists") == "true") {
+                                                annotation.loadAnnotations(annotation_url);
+                                            }
                                         }
-                                    }
-                                });
+                                    });
+                                }
                             },
                             error: function() {
                                 showWarningToast("error", "request file failed");
@@ -156,17 +165,19 @@ function imagesInit (height_delta, vocabulary) {
                         ]
                     });
                     annotation.setDrawingTool(settings.draw_type);
-                    var annotation_url = "http://" + service_host + "/file?storage=" + settings.store + settings.annotation_path + "/" + file_name + ".json";
-                    $.ajax({
-                        type: "HEAD",
-                        url: annotation_url,
-                        processData: false,
-                        success: function(data, textStatus, request) {
-                            if (request.getResponseHeader("Exists") == "true") {
-                                annotation.loadAnnotations(annotation_url);
+                    if (settings.show) {
+                        var annotation_url = "http://" + service_host + "/file?storage=" + settings.store + settings.annotation_path + "/" + file_name + ".json";
+                        $.ajax({
+                            type: "HEAD",
+                            url: annotation_url,
+                            processData: false,
+                            success: function(data, textStatus, request) {
+                                if (request.getResponseHeader("Exists") == "true") {
+                                    annotation.loadAnnotations(annotation_url);
+                                }
                             }
-                        }
-                    });
+                        });
+                    }
                 },
                 error: function() {
                     showWarningToast("error", "request file failed");
@@ -216,17 +227,19 @@ function imagesInit (height_delta, vocabulary) {
                         ]
                     });
                     annotation.setDrawingTool(settings.draw_type);
-                    var annotation_url = "http://" + service_host + "/file?storage=" + settings.store + settings.annotation_path + "/" + file_name + ".json";
-                    $.ajax({
-                        type: "HEAD",
-                        url: annotation_url,
-                        processData: false,
-                        success: function(data, textStatus, request) {
-                            if (request.getResponseHeader("Exists") == "true") {
-                                annotation.loadAnnotations(annotation_url);
+                    if (settings.show) {
+                        var annotation_url = "http://" + service_host + "/file?storage=" + settings.store + settings.annotation_path + "/" + file_name + ".json";
+                        $.ajax({
+                            type: "HEAD",
+                            url: annotation_url,
+                            processData: false,
+                            success: function(data, textStatus, request) {
+                                if (request.getResponseHeader("Exists") == "true") {
+                                    annotation.loadAnnotations(annotation_url);
+                                }
                             }
-                        }
-                    });
+                        });
+                    }
                 },
                 error: function() {
                     showWarningToast("error", "request file failed");
@@ -263,6 +276,27 @@ function imagesInit (height_delta, vocabulary) {
                     showWarningToast("error", "request service failed");
                 }
             });
+        }
+    }
+    
+    function switchShowAnnotations() {
+        var enable = $(this).is(":checked");
+        settings.show = enable;
+        if (enable) {
+            var annotation_path = $("#output-resource input").val();
+            var annotation_url = "http://" + service_host + "/file?storage=" + settings.store + annotation_path;
+            $.ajax({
+                type: "HEAD",
+                url: annotation_url,
+                processData: false,
+                success: function(data, textStatus, request) {
+                    if (request.getResponseHeader("Exists") == "true") {
+                        annotation.loadAnnotations(annotation_url);
+                    }
+                }
+            });
+        } else {
+            annotation.clearAnnotations();
         }
     }
 
