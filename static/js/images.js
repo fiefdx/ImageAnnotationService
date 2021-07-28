@@ -3,6 +3,8 @@ function imagesInit (height_delta, vocabulary) {
     var $current_image = $("input#current-image");
     var $total_images = $("input#total-images");
     var $btn_play = $("#btn_play");
+    var $btn_load_previous = $("#btn_load_previous");
+    var $btn_refresh = $("#btn_refresh");
     var $show_annotations = $("input#show-annotations");
     var $btn_previous = $("#btn_previous");
     var $interval = $("input#interval");
@@ -29,7 +31,9 @@ function imagesInit (height_delta, vocabulary) {
         cache: [],
         interval: 1,
         play: false,
-        frame_ready: false
+        frame_ready: false,
+        current_file_name: "",
+        previous_file_name: "",
     };
     var service_host = window.location.host;
     var annotation = null;
@@ -40,6 +44,7 @@ function imagesInit (height_delta, vocabulary) {
     $current_image.val(settings.current);
     $total_images.val(settings.total);
     $btn_play.bind('click', autoPlay);
+    $btn_load_previous.bind('click', loadPreviousAnnotation);
     $show_annotations.prop("checked", settings.show);
     $interval.val(settings.interval);
     $("#input-resource input").val("");
@@ -134,6 +139,7 @@ function imagesInit (height_delta, vocabulary) {
                                 $annotation_window.append(img);
                                 var file_name = data["file"]["name"];
                                 var file_path = data["file_path"];
+                                settings.current_file_name = file_name;
                                 settings.current = 1;
                                 $("input#current-image").val(settings.current);
                                 $("input#total-images").val(settings.total);
@@ -223,8 +229,10 @@ function imagesInit (height_delta, vocabulary) {
         if (settings.source) {
             if (settings.current > settings.interval) {
                 settings.current -= settings.interval;
+                settings.previous_file_name = settings.current_file_name;
             } else {
                 settings.current = settings.total;
+                settings.previous_file_name = "";
             }
             var image_url = "http://" + service_host + "/image?storage=" + settings.source + "&number=" + settings.current;
             $.ajax({
@@ -242,6 +250,7 @@ function imagesInit (height_delta, vocabulary) {
                     img.height = $(window).height() - height_delta;
                     var file_name = data["file"]["name"];
                     var file_path = data["file_path"];
+                    settings.current_file_name = file_name;
                     $("input#current-image").val(settings.current);
                     $("input#total-images").val(settings.total);
                     $("#input-resource input").val(settings.file_path + "/" + file_name);
@@ -269,10 +278,12 @@ function imagesInit (height_delta, vocabulary) {
 
     function nextImage() {
         if (settings.source) {
-            if (settings.current + settings.interval < settings.total) {
+            if (settings.current + settings.interval <= settings.total) {
                 settings.current += settings.interval;
+                settings.previous_file_name = settings.current_file_name;
             } else {
                 settings.current = 1;
+                settings.previous_file_name = "";
             }
             var image_url = "http://" + service_host + "/image?storage=" + settings.source + "&number=" + settings.current;
             $.ajax({
@@ -290,6 +301,7 @@ function imagesInit (height_delta, vocabulary) {
                     img.height = $(window).height() - height_delta;
                     var file_name = data["file"]["name"];
                     var file_path = data["file_path"];
+                    settings.current_file_name = file_name;
                     $("input#current-image").val(settings.current);
                     $("input#total-images").val(settings.total);
                     $("#input-resource input").val(settings.file_path + "/" + file_name);
@@ -312,6 +324,13 @@ function imagesInit (height_delta, vocabulary) {
             });
         } else {
             showWarningToast("error", "need to set valid data source");
+        }
+    }
+
+    function loadPreviousAnnotation() {
+        if (settings.previous_file_name) {
+            var annotation_url = "http://" + service_host + "/file?storage=" + settings.target_store + settings.annotation_path + "/" + settings.previous_file_name + ".json";
+            loadAnnotations(annotation_url);
         }
     }
 
