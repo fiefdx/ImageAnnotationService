@@ -38,7 +38,7 @@ function imagesInit (height_delta, vocabulary) {
     var service_host = window.location.host;
     var annotation = null;
     var play_timer = null;
-    var sleep_time = 0;
+    var sleep_time = 500;
 
     refreshPlayButton();
     $current_image.val(settings.current);
@@ -68,7 +68,7 @@ function imagesInit (height_delta, vocabulary) {
             clearTimeout(play_timer);
         } else {
             settings.play = true;
-            play_timer = setTimeout(play, sleep_time);
+            play_timer = setInterval(play, sleep_time);
         }
         refreshPlayButton();
     }
@@ -149,7 +149,6 @@ function imagesInit (height_delta, vocabulary) {
                                     image: 'annotation_image',
                                     locale: 'auto',
                                     widgets: [
-                                        {widget: 'COMMENT'},
                                         {widget: 'TAG', vocabulary: vocabulary}
                                     ]
                                 });
@@ -210,7 +209,6 @@ function imagesInit (height_delta, vocabulary) {
                         image: 'annotation_image',
                         locale: 'auto',
                         widgets: [
-                            {widget: 'COMMENT'},
                             {widget: 'TAG', vocabulary: vocabulary}
                         ]
                     });
@@ -259,7 +257,6 @@ function imagesInit (height_delta, vocabulary) {
                         image: 'annotation_image',
                         locale: 'auto',
                         widgets: [
-                            {widget: 'COMMENT'},
                             {widget: 'TAG', vocabulary: vocabulary}
                         ]
                     });
@@ -310,7 +307,6 @@ function imagesInit (height_delta, vocabulary) {
                         image: 'annotation_image',
                         locale: 'auto',
                         widgets: [
-                            {widget: 'COMMENT'},
                             {widget: 'TAG', vocabulary: vocabulary}
                         ]
                     });
