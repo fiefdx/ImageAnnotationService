@@ -51,10 +51,12 @@ class RemoteStorage(object):
         except Exception as e:
             LOG.exception(e)
 
-    def __init__(self, host, port):
+    def __init__(self, host, port, user = "", password = ""):
         self.host = host
         self.port = port
-        self.client = LiteDFSClient(self.host, self.port)
+        self.user = user
+        self.password = password
+        self.client = LiteDFSClient(self.host, self.port, user = user, password = password)
 
     def listdir(self, dir_path, sort_by = "name", desc = False, offset = 0, limit = -1, only_files = False):
         dirs = []

@@ -34,7 +34,7 @@ class ListImageFilesHandler(BaseHandler):
                 scheme = u.scheme
                 if dir_path and host and port:
                     if scheme.lower() == "ldfs":
-                        c = RemoteStorage(host, port)
+                        c = RemoteStorage(host, port, user = CONFIG["ldfs_user"], password = CONFIG["ldfs_password"])
                         files = []
                         total = 0
                         exists = c.exists_file(dir_path)
@@ -81,7 +81,7 @@ class ImageFileHandler(BaseHandler):
                 scheme = u.scheme
                 if dir_path and host and port and number > 0:
                     if scheme.lower() == "ldfs":
-                        c = RemoteStorage(host, port)
+                        c = RemoteStorage(host, port, user = CONFIG["ldfs_user"], password = CONFIG["ldfs_password"])
                         files = []
                         exists = False
                         z = None
@@ -141,7 +141,7 @@ class FileHandler(BaseHandler):
                 scheme = u.scheme
                 if file_path and host and port:
                     if scheme.lower() == "ldfs":
-                        c = RemoteStorage(host, port)
+                        c = RemoteStorage(host, port, user = CONFIG["ldfs_user"], password = CONFIG["ldfs_password"])
                         exists = c.exists_file(file_path)
                         if exists:
                             self.set_header('Exists', 'true')
@@ -179,7 +179,7 @@ class FileHandler(BaseHandler):
                 scheme = u.scheme
                 if file_path and host and port:
                     if scheme.lower() == "ldfs":
-                        c = RemoteStorage(host, port)
+                        c = RemoteStorage(host, port, user = CONFIG["ldfs_user"], password = CONFIG["ldfs_password"])
                         exists = c.exists_file(file_path)
                         if exists:
                             content = c.read_file(file_path)
@@ -223,7 +223,7 @@ class FileHandler(BaseHandler):
                 scheme = u.scheme
                 if file_path and host and port:
                     if scheme.lower() == "ldfs":
-                        c = RemoteStorage(host, port)
+                        c = RemoteStorage(host, port, user = CONFIG["ldfs_user"], password = CONFIG["ldfs_password"])
                         success = c.delete_file(file_path)
                         if success:
                             success = c.upload_file_by_content(file_body, file_path, replica = 1)

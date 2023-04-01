@@ -59,6 +59,8 @@ if __name__ == "__main__":
         CONFIG["data_path"] = workspace
         CONFIG["http_host"] = input_data["http_host"]
         CONFIG["http_port"] = input_data["http_port"]
+        CONFIG["ldfs_user"] = input_data["ldfs_user"]
+        CONFIG["ldfs_password"] = input_data["ldfs_password"]
         CONFIG["cache_ttl"] = input_data["cache_ttl"]
         CONFIG["cache_check_interval"] = input_data["cache_check_interval"]
         RemoteStorage.ioloop_service(interval = CONFIG["cache_check_interval"])
