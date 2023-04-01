@@ -395,6 +395,9 @@ function imagesInit (height_delta, vocabulary) {
                             settings.cache = JSON.parse(data);
                             if (settings.show) {
                                 annotation.setAnnotations(settings.cache);
+                                annotation.on('clickAnnotation', function(annotation, element) {
+                                    console.log("click: ", annotation, element);
+                                });
                             }
                         }
                     });
